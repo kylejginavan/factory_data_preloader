@@ -1,0 +1,2 @@
+require 'factory_data_preloader/factory_data'
+require 'factory_data_preloader/rails_core_ext'
