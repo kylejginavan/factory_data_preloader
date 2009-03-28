@@ -107,7 +107,7 @@ class FactoryDataTest < Test::Unit::TestCase
     end
     
     should 'print an appropriate error message when preload_data! is called' do
-      out, err = util_capture do
+      out, err = OutputCapturer.capture do
         FactoryData.preload_data!
       end
       
@@ -142,25 +142,5 @@ class FactoryDataTest < Test::Unit::TestCase
       assert_equal FactoryData.users(:john), FactoryData.comments(:woohoo).user
       assert_equal FactoryData.posts(:tour), FactoryData.comments(:woohoo).post
     end
-  end
-  
-  private
-  
-  # borrowed from zentest assertions...
-  def util_capture
-    require 'stringio'
-    orig_stdout = $stdout.dup
-    orig_stderr = $stderr.dup
-    captured_stdout = StringIO.new
-    captured_stderr = StringIO.new
-    $stdout = captured_stdout
-    $stderr = captured_stderr
-    yield
-    captured_stdout.rewind
-    captured_stderr.rewind
-    return captured_stdout.string, captured_stderr.string
-  ensure
-    $stdout = orig_stdout
-    $stderr = orig_stderr
   end
 end
