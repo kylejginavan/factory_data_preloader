@@ -1,5 +1,8 @@
 require 'ostruct'
 
+class PreloaderAlreadyDefinedError < StandardError; end
+class PreloadedRecordNotFound < StandardError; end
+
 class FactoryData
   @@preloaded_cache = nil
   @@preloaded_data_deleted = nil
@@ -9,8 +12,8 @@ class FactoryData
   class << self
 
     def preload(model_type, options = {}, &block)
-      raise "You have already preloaded data for #{model_type.to_s}" if @@preloaders.select { |p| p.model_type == model_type }.present?
-    
+      raise PreloaderAlreadyDefinedError.new, "You have already defined the preloader for #{model_type.to_s}" if @@preloaders.map(&:model_type).include?(model_type)
+      
       model_class = options[:model_class] || model_type.to_s.singularize.classify.constantize
       @@preloaders << OpenStruct.new(:model_type => model_type, :model_class => model_class, :proc => block) 
 
@@ -44,7 +47,7 @@ class FactoryData
         preloader.proc.try(:call, data)
         data.each do |key, record|
           if record.new_record? && !record.save
-            puts "\nError proloading factory data.  #{preloader.model_class.to_s} :#{key.to_s} could not be saved.  Errors: "
+            puts "\nError preloading factory data.  #{preloader.model_class.to_s} :#{key.to_s} could not be saved.  Errors: "
             puts pretty_error_messages(record)
             puts "\n\n"
             next
@@ -55,7 +58,7 @@ class FactoryData
       end
     end
   
-    def reset_cache
+    def reset_cache!
       @@single_test_cache = {}
     end
 
@@ -65,7 +68,7 @@ class FactoryData
       @@single_test_cache[type] ||= {}
       @@single_test_cache[type][key] ||= begin
         record = model_class.find_by_id(@@preloaded_cache[type][key])
-        raise "Could not find a record for FactoryData.#{type}(:#{key})." unless record
+        raise PreloadedRecordNotFound.new, "Could not find a record for FactoryData.#{type}(:#{key})." unless record
         record
       end
     end
