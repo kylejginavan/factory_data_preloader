@@ -1,26 +1,7 @@
-require 'test_helper'
-
-class FactoryData
-  def self.reset!
-    @@preloaders.reverse.each do |preloader|
-      class << self; self; end.class_eval do 
-        remove_method(preloader.model_type) 
-      end
-      
-      unless @@preloaded_cache.nil?
-        preloader.model_class.delete_all(:id => @@preloaded_cache[preloader.model_type].values)
-      end
-    end
-    
-    @@preloaded_cache = nil
-    @@preloaded_data_deleted = nil
-    @@single_test_cache = {}
-    @@preloaders = []
-  end
-end
+require File.dirname(__FILE__) + '/test_helper'
 
 class FactoryDataTest < Test::Unit::TestCase  
-  def teardown
+  def setup
     FactoryData.reset!
   end
   
@@ -93,6 +74,22 @@ class FactoryDataTest < Test::Unit::TestCase
           end
         end
       end
+    end
+  end
+  
+  context 'Preloading a record that has not been saved' do
+    setup do
+      @unsaved_user = User.new(:first_name => 'George', :last_name => 'Washington')
+      assert @unsaved_user.new_record?
+      
+      FactoryData.preload(:users) do |data|
+        data[:bob] = @unsaved_user
+      end
+    end
+    
+    should 'save the record wen preload_data! is called' do
+      FactoryData.preload_data!
+      assert !@unsaved_user.new_record?
     end
   end
   
