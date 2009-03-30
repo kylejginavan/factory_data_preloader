@@ -38,7 +38,7 @@ module OutputCapturer
   end
 end
 
-class FactoryData
+class FactoryDataPreloader::FactoryData
   # helper method to reset the factory data between test runs.
   def self.reset!
     @@preloaders.reverse.each do |preloader|

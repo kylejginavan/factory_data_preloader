@@ -12,5 +12,6 @@ require 'active_record'
 require 'active_record/fixtures'
 
 require 'factory_data_preloader/core_ext'
+require 'factory_data_preloader/preloader'
 require 'factory_data_preloader/factory_data'
 require 'factory_data_preloader/rails_core_ext'

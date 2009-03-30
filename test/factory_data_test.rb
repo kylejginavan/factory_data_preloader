@@ -16,7 +16,7 @@ class FactoryDataTest < Test::Unit::TestCase
     should_change "FactoryData.methods.include?('users')", :from => false, :to => true
     
     should 'not allow it to be called again' do
-      assert_raise PreloaderAlreadyDefinedError do
+      assert_raise FactoryDataPreloader::PreloaderAlreadyDefinedError do
         FactoryData.preload(:users)
       end
     end
@@ -54,7 +54,7 @@ class FactoryDataTest < Test::Unit::TestCase
         end
         
         should 'raise the appropriate error for a non-existant key' do
-          assert_raise PreloadedRecordNotFound do
+          assert_raise FactoryDataPreloader::PreloadedRecordNotFound do
             FactoryData.users(:not_a_user)
           end
         end
