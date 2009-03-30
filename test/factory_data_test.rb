@@ -125,25 +125,25 @@ class FactoryDataTest < Test::Unit::TestCase
     end
   end
   
-  context 'Preloading multiple record types' do
+  context 'Preloading multiple record types, with dependencies' do
     setup do
+      FactoryData.preload(:comments, :depends_on => [:users, :posts]) do |data|
+        data[:woohoo] = FactoryData.users(:john).comments.create(:post => FactoryData.posts(:tour), :comment => "I can't wait!")
+      end
+      
+      FactoryData.preload(:posts, :depends_on => :users) do |data|
+        data[:tour] = FactoryData.users(:thom).posts.create(:title => 'Tour!', :body => 'Radiohead will tour soon.')
+      end
+      
       FactoryData.preload(:users) do |data|
         data[:thom] = User.create(:first_name => 'Thom', :last_name => 'York')
         data[:john] = User.create(:first_name => 'John', :last_name => 'Doe')
       end
       
-      FactoryData.preload(:posts) do |data|
-        data[:tour] = FactoryData.users(:thom).posts.create(:title => 'Tour!', :body => 'Radiohead will tour soon.')
-      end
-      
-      FactoryData.preload(:comments) do |data|
-        data[:woohoo] = FactoryData.users(:john).comments.create(:post => FactoryData.posts(:tour), :comment => "I can't wait!")
-      end
-      
       FactoryData.preload_data!
     end
     
-    should 'preload them in the defined order, allowing you to use prior definitions in later definitions' do
+    should 'preload them in the proper order, allowing you to use the dependencies' do
       assert_equal 'Thom', FactoryData.users(:thom).first_name
       assert_equal 'John', FactoryData.users(:john).first_name
       

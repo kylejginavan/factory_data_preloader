@@ -47,7 +47,7 @@ class FactoryDataPreloader::FactoryData
       end
       
       unless @@preloaded_cache.nil?
-        preloader.model_class.delete_all(:id => @@preloaded_cache[preloader.model_type].values)
+        preloader.model_class.delete_all(:id => (@@preloaded_cache[preloader.model_type] || {}).values)
       end
     end
     

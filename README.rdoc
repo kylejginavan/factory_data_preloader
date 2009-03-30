@@ -38,16 +38,18 @@ Define your data like this:
     data[:john] = User.create(:first_name => 'John', :last_name => 'Doe')
   end
 
-  FactoryData.preload(:posts) do |data|
+  FactoryData.preload(:posts, :depends_on => :users) do |data|
+    # note the use of the :depends_on option to force the users to be loaded first.
     data[:tour] = FactoryData.users(:thom).posts.create(:title => 'Tour!', :body => 'Radiohead will tour soon.')
   end
   
-  FactoryData.preload(:some_other_posts, :model_class => Post) do |data|
+  FactoryData.preload(:some_other_posts, :model_class => Post, :depends_on => :users) do |data|
     # note the use of the :model_class option when the model class cannot be inferred from the symbol.
     data[:another_post] = Post.create(:user => FactoryData.users(:john), :title => 'Life is good')
   end
 
-  FactoryData.preload(:comments) do |data|
+  FactoryData.preload(:comments, :depends_on => [:users, :posts]) do |data|
+    # :depends_on lets you pass an array
     data[:woohoo] = FactoryData.users(:john).comments.create(:post => FactoryData.posts(:tour), :comment => "I can't wait!")
   end
 
@@ -70,10 +72,13 @@ Finally, use this preloaded data in your tests:
 * FactoryData#preload defines a new method on FactoryData using the same name as the symbol.
 * This can be mixed-n-matched with fixtures.  You may want to keep using fixtures in an existing code base,
   or migrate over to this slowly.
-* The data gets preloaded in the order the preloaders are defined.  Note in the example above that the users defined in
-  the first preloader get used in the later preloaders.
+* If you have dependencies between your preloaded data, you can use the :depends_on option to force some records to be preloaded 
+  before others.  Where no dependencies exist, the preloaders are run in the order they are defined.
 * FactoryData#preload attempts to infer the appropriate model class from the symbol you pass.  If your symbol doesn't
   match the model class, pass the model class using the :model_class option.
+* The preloader will also delete all records from the database, before any preloading begins.  This is done at the same
+  time that rails deletes records for test fixtures.  The tables are cleared using the reverse of the order defined by 
+  your :depends_on options, so be sure to use :depends_on if you have foreign key constraints.
 
 == Copyright
 

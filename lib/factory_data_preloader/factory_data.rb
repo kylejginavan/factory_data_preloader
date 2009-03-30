@@ -16,7 +16,8 @@ module FactoryDataPreloader
         raise PreloaderAlreadyDefinedError.new, "You have already defined the preloader for #{model_type.to_s}" if @@preloaders.map(&:model_type).include?(model_type)
       
         model_class = options[:model_class] || model_type.to_s.singularize.classify.constantize
-        @@preloaders << FactoryDataPreloader::Preloader.new(model_type, model_class, proc, @@preloaders.size)
+        depends_on = [options[:depends_on]].compact.flatten
+        @@preloaders << FactoryDataPreloader::Preloader.new(model_type, model_class, proc, @@preloaders.size, depends_on)
 
         class << self; self; end.class_eval do
           define_method model_type do |key|
@@ -31,7 +32,7 @@ module FactoryDataPreloader
     
         # the preloaders are listed in the parent -> child table order,
         # so we need to delete them in reverse.
-        @@preloaders.reverse.each do |preloader|
+        @@preloaders.sort.reverse.each do |preloader|
           preloader.model_class.delete_all
         end
     
@@ -42,7 +43,7 @@ module FactoryDataPreloader
         return unless @@preloaded_cache.nil? # make sure the data is only preloaded once.
         @@preloaded_cache = {}
     
-        @@preloaders.each do |preloader|
+        @@preloaders.sort.each do |preloader|
           cache = @@preloaded_cache[preloader.model_type] ||= {}
           preloader.data.each do |key, record|
             if record.new_record? && !record.save
