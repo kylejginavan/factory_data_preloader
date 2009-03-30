@@ -2,14 +2,14 @@
 
 Gem::Specification.new do |s|
   s.name = %q{factory_data_preloader}
-  s.version = "0.1.0"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Myron Marston"]
   s.date = %q{2009-03-30}
   s.email = %q{myron.marston@gmail.com}
   s.extra_rdoc_files = ["README.rdoc", "LICENSE"]
-  s.files = ["README.rdoc", "VERSION.yml", "lib/factory_data_preloader", "lib/factory_data_preloader/core_ext.rb", "lib/factory_data_preloader/factory_data.rb", "lib/factory_data_preloader/rails_core_ext.rb", "lib/factory_data_preloader.rb", "test/factory_data_test.rb", "test/lib", "test/lib/models.rb", "test/lib/schema.rb", "test/test_helper.rb", "LICENSE"]
+  s.files = ["README.rdoc", "VERSION.yml", "lib/factory_data_preloader", "lib/factory_data_preloader/core_ext.rb", "lib/factory_data_preloader/factory_data.rb", "lib/factory_data_preloader/preloader.rb", "lib/factory_data_preloader/rails_core_ext.rb", "lib/factory_data_preloader.rb", "test/factory_data_test.rb", "test/lib", "test/lib/models.rb", "test/lib/schema.rb", "test/preloader_test.rb", "test/test_helper.rb", "LICENSE"]
   s.has_rdoc = true
   s.homepage = %q{http://github.com/myronmarston/factory_data_preloader}
   s.rdoc_options = ["--inline-source", "--charset=UTF-8"]
