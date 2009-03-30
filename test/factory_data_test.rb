@@ -83,7 +83,7 @@ class FactoryDataTest < Test::Unit::TestCase
       assert @unsaved_user.new_record?
       
       FactoryData.preload(:users) do |data|
-        data[:bob] = @unsaved_user
+        data[:george] = @unsaved_user
       end
     end
     
@@ -109,6 +109,19 @@ class FactoryDataTest < Test::Unit::TestCase
       end
       
       assert_match /Error preloading factory data\.\s+User :bob could not be saved\.\s+Errors:\s+last_name can't be blank/im, out
+    end
+  end
+  
+  context 'Preloading with an explicit :model_class option' do
+    setup do
+      FactoryData.preload(:posts, :model_class => User) do |data|
+        data[:george] = User.create(:first_name => 'George', :last_name => 'Washington')
+      end
+      FactoryData.preload_data!
+    end
+    
+    should 'use the passed model_class rather than inferring the class from the symbol' do
+      assert_equal User, FactoryData.posts(:george).class
     end
   end
   
