@@ -5,7 +5,7 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "factory_data_preloader"
-    gem.summary = %Q{TODO}
+    gem.summary = %Q{A library for preloading test data in rails applications.}
     gem.email = "myron.marston@gmail.com"
     gem.homepage = "http://github.com/myronmarston/factory_data_preloader"
     gem.authors = ["Myron Marston"]
