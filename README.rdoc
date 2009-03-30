@@ -6,7 +6,7 @@ fixtures don't represent "real data".  Fixtures just dump the data you've define
 without going through the model--meaning you don't get any of the validations or before/after save callback 
 behavior defined on your models.
 
-There are multiple gems and plugins that address this; my personal favorite is factory girl.
+There are multiple gems and plugins that address this; my personal favorite is {factory girl}[http://github.com/thoughtbot/factory_girl/].
 
 However, none of the solutions I've tried are as fast as using test fixtures.  When you use test fixtures,
 rails rolls back the database transaction used in each test and allows you to re-use your fixture data.  
