@@ -1,3 +1,7 @@
+# TODO: add tests for this.  I've manually tested this in a Rails 2.2 and 2.3 app, but haven't found a way to add
+# a test for this to our test suite.  It's difficult to test this since it just modifies what happens before the 
+# tests are run.
+
 # Between Rails 2.2 and 2.3, the fixture loading code was moved from
 # Test::Unit::TestCase to ActiveRecord::TestFixtures.  See this commit:
 # http://github.com/rails/rails/commit/b0ee1bdf2650d7a8380d4e9be58bba8d9c5bd40e
