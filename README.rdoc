@@ -1,6 +1,79 @@
 = factory_data_preloader
 
-Description goes here.
+If you're like me, you really dislike using rails test fixtures.  On the rails projects I've worked on that
+have used test fixtures, we've had a number of tests that passed as false positives because the test
+fixtures don't represent "real data".  Fixtures just dump the data you've defined directly into the database,
+without going through the model--meaning you don't get any of the validations or before/after save callback 
+behavior defined on your models.
+
+There are multiple gems and plugins that address this; my personal favorite is factory girl.
+
+However, none of the solutions I've tried are as fast as using test fixtures.  When you use test fixtures,
+rails rolls back the database transaction used in each test and allows you to re-use your fixture data.  
+This is much much quicker then creating the data you will use directly in each test.
+
+This gem attempts to solve this issue, and give you the best of both worlds: create your test data using 
+factory girl, the models themselves, or any other solution you want, while also being able to pre-load it
+and re-use it in each test when rails rolls back the transaction.
+
+== Download
+
+Github: http://github.com/myronmarston/factory_data_preloader/tree/master
+
+Gem:
+  gem install myronmarston-factory_data_preloader --source http://gems.github.com
+  
+== Usage
+
+Load the gem using Rails' 2.1+ gem support, in either config/environment.rb, or config/environments/test.rb:
+  config.gem 'myronmarston-factory_data_preloader', 
+    :lib => 'factory_data_preloader', 
+    :source => 'http://gems.github.com'
+
+Define your preloaded data.  Simply require the file(s) that define the preloaded data in your test/test_helper.rb.
+Define your data like this:
+
+  FactoryData.preload(:users) do |data|
+    data[:thom] = User.create(:first_name => 'Thom', :last_name => 'York')
+    data[:john] = User.create(:first_name => 'John', :last_name => 'Doe')
+  end
+
+  FactoryData.preload(:posts) do |data|
+    data[:tour] = FactoryData.users(:thom).posts.create(:title => 'Tour!', :body => 'Radiohead will tour soon.')
+  end
+  
+  FactoryData.preload(:some_other_posts, :model_class => Post) do |data|
+    # note the use of the :model_class option when the model class cannot be inferred from the symbol.
+    data[:another_post] = Post.create(:user => FactoryData.users(:john), :title => 'Life is good')
+  end
+
+  FactoryData.preload(:comments) do |data|
+    data[:woohoo] = FactoryData.users(:john).comments.create(:post => FactoryData.posts(:tour), :comment => "I can't wait!")
+  end
+
+Finally, use this preloaded data in your tests:
+
+  class UserTest < ActiveSupport::TestCase
+    def test_thom_has_last_name
+      user = FactoryData.users(:thom)
+      assert_equal 'York', user.last_name
+    end
+  end
+
+== Notes, etc.
+
+* This gem has been tested with Rails 2.2.2 and Rails 2.3.2.
+* You can create the data using any gem or plugin you want.  In this contrived example, I just used ActiveRecord's
+  built in methods for simplicity's sake.
+* FactoryData#preload does not actually preload the data.  It simply defines the data that will be automatically preloaded
+  at the appropriate time (namely, at the same time when rails loads the fixtures).
+* FactoryData#preload defines a new method on FactoryData using the same name as the symbol.
+* This can be mixed-n-matched with fixtures.  You may want to keep using fixtures in an existing code base,
+  or migrate over to this slowly.
+* The data gets preloaded in the order the preloaders are defined.  Note in the example above that the users defined in
+  the first preloader get used in the later preloaders.
+* FactoryData#preload attempts to infer the appropriate model class from the symbol you pass.  If your symbol doesn't
+  match the model class, pass the model class using the :model_class option.
 
 == Copyright
 
