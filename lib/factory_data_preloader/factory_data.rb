@@ -11,7 +11,12 @@ module FactoryDataPreloader
     @@preloaders = []
   
     class << self
-
+      # An Array of strings specifying locations that should be searched for
+      # factory_data definitions. By default, factory_data_preloader will attempt to require
+      # "factory_data," "test/factory_data," and "spec/factory_data." Only the first
+      # existing file will be loaded.
+      attr_accessor :definition_file_paths
+      
       def preload(model_type, options = {}, &proc)
         raise PreloaderAlreadyDefinedError.new, "You have already defined the preloader for #{model_type.to_s}" if @@preloaders.map(&:model_type).include?(model_type)
       
@@ -61,6 +66,18 @@ module FactoryDataPreloader
       def reset_cache!
         @@single_test_cache = {}
       end
+      
+      def find_definitions
+        definition_file_paths.each do |path|
+          require("#{path}.rb") if File.exists?("#{path}.rb")
+
+          if File.directory? path
+            Dir[File.join(path, '*.rb')].each do |file|
+              require file
+            end
+          end
+        end
+      end
 
       private
 
@@ -81,6 +98,8 @@ module FactoryDataPreloader
         end
       end
     end
+    
+    self.definition_file_paths = %w(factory_data test/factory_data spec/factory_data)
   end
 end
 
