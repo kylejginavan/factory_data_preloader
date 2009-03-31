@@ -30,8 +30,8 @@ Load the gem using Rails' 2.1+ gem support, in either config/environment.rb, or 
     :lib => 'factory_data_preloader', 
     :source => 'http://gems.github.com'
 
-Define your preloaded data.  Simply require the file(s) that define the preloaded data in your test/test_helper.rb.
-Define your data like this:
+Define your preloaded data.  FactoryData will automatically require test/factory_data.rb or test/factory_data/*.rb.
+Define your data in these files like this:
 
   FactoryData.preload(:users) do |data|
     data[:thom] = User.create(:first_name => 'Thom', :last_name => 'York')
