@@ -1,11 +1,14 @@
 module FactoryDataPreloader
+  class PreloaderNotDefinedError < StandardError; end
+
   class Preloader
-    attr_accessor :model_type, :model_class, :proc, :defined_index, :depends_on
-  
-    def initialize(model_type, model_class, proc, defined_index, depends_on)
-      @model_type, @model_class, @proc, @defined_index, @depends_on = model_type, model_class, proc, defined_index, depends_on || []
+    attr_accessor :model_type, :model_class, :proc, :depends_on
+
+    def initialize(model_type, model_class, proc, depends_on)
+      @model_type, @model_class, @proc, @depends_on = model_type, model_class, proc, depends_on || []
+      PreloaderCollection.instance << self
     end
-  
+
     def data
       @data ||= begin
         data = {}
@@ -13,15 +16,34 @@ module FactoryDataPreloader
         data
       end
     end
-    
-    def <=>(preloader)
-      if self.depends_on.include?(preloader.model_type)
-        1
-      elsif preloader.depends_on.include?(self.model_type)
-        -1
-      else
-        self.defined_index <=> preloader.defined_index
+
+    def dependencies
+      @dependencies ||= begin
+        self.depends_on.collect do |dependency|
+          preloader = PreloaderCollection.instance.detect { |p| p.model_type == dependency }
+          raise PreloaderNotDefinedError, "The preloader for :#{dependency} has not been defined." unless preloader
+          preloader
+        end
       end
+    end
+  end
+
+  class PreloaderCollection < Array
+    include Singleton
+
+    def dependency_order
+      unordered_preloaders = Array.new(self) # rather than using self.dup since singleton doesn't allow duping.
+      ordered_preloaders = []
+
+      until unordered_preloaders.empty?
+        unordered_preloaders.each do |preloader|
+          if preloader.dependencies.all? { |dependency| ordered_preloaders.include?(dependency) }
+            ordered_preloaders << unordered_preloaders.delete(preloader)
+          end
+        end
+      end
+
+      ordered_preloaders
     end
   end
 end
