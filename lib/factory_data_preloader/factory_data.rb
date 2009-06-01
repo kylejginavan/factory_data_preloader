@@ -3,6 +3,7 @@ require 'ostruct'
 module FactoryDataPreloader
   class PreloaderAlreadyDefinedError < StandardError; end
   class PreloadedRecordNotFound < StandardError; end
+  class DefinedPreloaderNotRunError < StandardError; end
 
   class FactoryData
     @@preloaded_cache = nil
@@ -80,6 +81,10 @@ module FactoryDataPreloader
       private
 
       def get_record(type, model_class, key)
+        if @@preloaded_cache[type].nil?
+          raise DefinedPreloaderNotRunError, "The :#{type} preloader has never been run.  Did you forget to add the 'preload_factory_data :#{type}' declaration to your test case?  You'll need this at the top of your test case class if you want to use the factory data defined by this preloader."
+        end
+
         @@single_test_cache[type] ||= {}
         @@single_test_cache[type][key] ||= begin
           record = model_class.find_by_id(@@preloaded_cache[type][key])
