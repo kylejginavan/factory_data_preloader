@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/test_helper'
 
 class PreloaderTest < Test::Unit::TestCase
   def setup
-    FactoryDataPreloader::PreloaderCollection.instance.clear
+    FactoryDataPreloader.reset!
   end
 
   context 'A new preloader' do
@@ -21,7 +21,7 @@ class PreloaderTest < Test::Unit::TestCase
     end
 
     should 'be automatically added to the PreloaderCollection' do
-      assert_equal [@preloader], FactoryDataPreloader::PreloaderCollection.instance
+      assert_equal [@preloader], FactoryDataPreloader::AllPreloaders.instance
     end
   end
 
@@ -59,7 +59,44 @@ class PreloaderTest < Test::Unit::TestCase
 
     should 'sort correctly for PreloaderCollection.instance.dependency_order' do
       expected = [@ip_addresses, @users, @posts, @post_images, @post_image_ratings]
-      assert_equal expected.map(&:model_type), FactoryDataPreloader::PreloaderCollection.instance.dependency_order.map(&:model_type)
+      assert_equal expected.map(&:model_type), FactoryDataPreloader::AllPreloaders.instance.dependency_order.map(&:model_type)
+    end
+
+    should 'return the correct preloader objects for #all_dependencies' do
+      assert_same_elements [@post_images, @posts, @users], @post_image_ratings.all_dependencies
+      assert_same_elements [@posts, @users], @post_images.all_dependencies
+      assert_same_elements [], @ip_addresses.all_dependencies
+      assert_same_elements [@users], @posts.all_dependencies
+      assert_same_elements [], @users.all_dependencies
+    end
+
+    context 'when FactoryDataPreloader.preload_all = true' do
+      setup do
+        FactoryDataPreloader.preload_all = true
+      end
+
+      should 'return all preloaders for FactoryDataPreloader.requested_preloaders' do
+        expected = [@ip_addresses, @users, @posts, @post_images, @post_image_ratings]
+        assert_equal expected.map(&:model_type), FactoryDataPreloader.requested_preloaders.dependency_order.map(&:model_type)
+      end
+    end
+
+    context 'when FactoryDataPreloader.preload_all = false' do
+      setup do
+        FactoryDataPreloader.preload_all = false
+      end
+
+      should 'return no preloaders when for FactoryDataPreloader.requested_preloaders when preload_types is empty' do
+        assert_equal [], FactoryDataPreloader.preload_types
+        assert_equal [], FactoryDataPreloader.requested_preloaders
+      end
+
+      should 'return just the requested preloaders for FactoryDataPreloader.requested_preloaders' do
+        FactoryDataPreloader.preload_types << :post_images
+        FactoryDataPreloader.preload_types << :ip_addresses
+        expected = [@ip_addresses, @users, @posts, @post_images]
+        assert_equal expected.map(&:model_type), FactoryDataPreloader.requested_preloaders.dependency_order.map(&:model_type)
+      end
     end
   end
 end

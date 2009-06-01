@@ -1,12 +1,35 @@
 module FactoryDataPreloader
   class PreloaderNotDefinedError < StandardError; end
 
+  mattr_accessor :preload_all
+  self.preload_all = true
+
+  mattr_accessor :preload_types
+  self.preload_types = []
+
+  class << self
+    alias :preload_all? :preload_all
+
+    def requested_preloaders
+      @requested_preloaders ||= begin
+        if preload_all?
+          AllPreloaders.instance
+        else
+          preloaders = self.preload_types.collect { |type| AllPreloaders.instance.from_symbol(type) }
+          preloaders += (preloaders.collect { |p| p.all_dependencies }).flatten
+          preloaders.uniq!
+          PreloaderCollection.new(preloaders)
+        end
+      end
+    end
+  end
+
   class Preloader
     attr_accessor :model_type, :model_class, :proc, :depends_on
 
     def initialize(model_type, model_class, proc, depends_on)
       @model_type, @model_class, @proc, @depends_on = model_type, model_class, proc, depends_on || []
-      PreloaderCollection.instance << self
+      AllPreloaders.instance << self
     end
 
     def data
@@ -20,32 +43,11 @@ module FactoryDataPreloader
     end
 
     def dependencies
-      @dependencies ||= begin
-        self.depends_on.collect do |dependency|
-          preloader = PreloaderCollection.instance.detect { |p| p.model_type == dependency }
-          raise PreloaderNotDefinedError, "The preloader for :#{dependency} has not been defined." unless preloader
-          preloader
-        end
-      end
+      @dependencies ||= self.depends_on.collect { |dependency| AllPreloaders.instance.from_symbol(dependency) }
     end
-  end
 
-  class PreloaderCollection < Array
-    include Singleton
-
-    def dependency_order
-      unordered_preloaders = Array.new(self) # rather than using self.dup since singleton doesn't allow duping.
-      ordered_preloaders = []
-
-      until unordered_preloaders.empty?
-        unordered_preloaders.each do |preloader|
-          if preloader.dependencies.all? { |dependency| ordered_preloaders.include?(dependency) }
-            ordered_preloaders << unordered_preloaders.delete(preloader)
-          end
-        end
-      end
-
-      ordered_preloaders
+    def all_dependencies
+      @all_dependencies ||= (self.dependencies + (self.dependencies.collect { |d| d.all_dependencies }).flatten).uniq
     end
   end
 

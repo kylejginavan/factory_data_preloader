@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/test_helper'
 
 class FactoryDataTest < Test::Unit::TestCase  
   def setup
-    FactoryData.reset!
+    FactoryDataPreloader.reset!
   end
   
   context 'Calling FactoryData.preload(:users)' do

@@ -38,23 +38,32 @@ module OutputCapturer
   end
 end
 
-class FactoryDataPreloader::FactoryData
-  # helper method to reset the factory data between test runs.
+module FactoryDataPreloader
   def self.reset!
-    FactoryDataPreloader::PreloaderCollection.instance.dependency_order.reverse.each do |preloader|
-      class << self; self; end.class_eval do
-        remove_method(preloader.model_type)
+    self.preload_all = true
+    self.preload_types = []
+    @requested_preloaders = nil
+    FactoryData.reset!
+  end
+
+  class FactoryData
+    # helper method to reset the factory data between test runs.
+    def self.reset!
+      FactoryDataPreloader::AllPreloaders.instance.each do |preloader|
+        class << self; self; end.class_eval do
+          remove_method(preloader.model_type) if method_defined?(preloader.model_type)
+        end
+
+        unless @@preloaded_cache.nil?
+          preloader.model_class.delete_all(:id => (@@preloaded_cache[preloader.model_type] || {}).values)
+        end
       end
 
-      unless @@preloaded_cache.nil?
-        preloader.model_class.delete_all(:id => (@@preloaded_cache[preloader.model_type] || {}).values)
-      end
+      @@preloaded_cache = nil
+      @@preloaded_data_deleted = nil
+      @@single_test_cache = {}
+      FactoryDataPreloader::AllPreloaders.instance.clear
     end
-
-    @@preloaded_cache = nil
-    @@preloaded_data_deleted = nil
-    @@single_test_cache = {}
-    FactoryDataPreloader::PreloaderCollection.instance.clear
   end
 end
 

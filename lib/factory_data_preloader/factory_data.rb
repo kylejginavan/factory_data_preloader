@@ -17,7 +17,7 @@ module FactoryDataPreloader
       attr_accessor :definition_file_paths
 
       def preload(model_type, options = {}, &proc)
-        raise PreloaderAlreadyDefinedError.new, "You have already defined the preloader for #{model_type.to_s}" if PreloaderCollection.instance.map(&:model_type).include?(model_type)
+        raise PreloaderAlreadyDefinedError.new, "You have already defined the preloader for #{model_type.to_s}" if AllPreloaders.instance.map(&:model_type).include?(model_type)
 
         model_class = options[:model_class] || model_type.to_s.singularize.classify.constantize
         depends_on = [options[:depends_on]].compact.flatten
@@ -35,7 +35,7 @@ module FactoryDataPreloader
         return unless @@preloaded_data_deleted.nil?
 
         # Delete them in the reverse order of the dependencies, to handle foreign keys
-        PreloaderCollection.instance.dependency_order.reverse.each do |preloader|
+        FactoryDataPreloader.requested_preloaders.reverse.each do |preloader|
           preloader.model_class.delete_all
         end
 
@@ -46,7 +46,7 @@ module FactoryDataPreloader
         return unless @@preloaded_cache.nil? # make sure the data is only preloaded once.
         @@preloaded_cache = {}
 
-        PreloaderCollection.instance.dependency_order.each do |preloader|
+        FactoryDataPreloader.requested_preloaders.dependency_order.each do |preloader|
           cache = @@preloaded_cache[preloader.model_type] ||= {}
           preloader.data.each do |key, record|
             if record.new_record? && !record.save

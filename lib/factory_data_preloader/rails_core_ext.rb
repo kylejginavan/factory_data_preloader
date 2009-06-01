@@ -31,3 +31,9 @@ class Fixtures
   
   alias_method_chain :delete_existing_fixtures, :preloaded_factory_data
 end
+
+class ActiveSupport::TestCase
+  def self.preload_factory_data(*types)
+    types.each { |t| FactoryDataPreloader.preload_types << t }
+  end
+end
