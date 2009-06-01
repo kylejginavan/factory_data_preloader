@@ -11,8 +11,10 @@ module FactoryDataPreloader
 
     def data
       @data ||= begin
-        data = {}
-        self.proc.try(:call, data)
+        data = PreloaderDataHash.new
+        print "Preloading #{model_type}:"
+        benchmark_measurement = Benchmark.measure { self.proc.try(:call, data) }
+        print "(#{format('%.3f', benchmark_measurement.real)} secs)\n"
         data
       end
     end
@@ -46,4 +48,12 @@ module FactoryDataPreloader
       ordered_preloaders
     end
   end
+
+  class PreloaderDataHash < Hash
+    def []=(key, value)
+      print "."
+      super
+    end
+  end
+
 end
