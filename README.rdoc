@@ -55,11 +55,38 @@ Define your data in these files like this:
 
 Finally, use this preloaded data in your tests:
 
+  # test/user_test.rb
   class UserTest < ActiveSupport::TestCase
     def test_thom_has_last_name
       user = FactoryData.users(:thom)
       assert_equal 'York', user.last_name
     end
+  end
+
+  # test/post_test.rb
+  class PostTest < ActiveSupport::TestCase
+    def test_post_has_body
+      post = FactoryData.posts(:tour)
+      assert_not_nil post.body
+    end
+  end
+
+All factory data is automatically preloaded for all tests.  In a large rails application, this can incur a significant performance penalty 
+at the start of each test run.  If you want finer grain control over which preloaders run, you can configure it like so:
+
+  # in test_helper.rb
+  FactoryDataPreloader.preload_all = false
+
+  # test/user_test.rb
+  class UserTest < ActiveSupport::TestCase
+    preload_factory_data :users # multiple types can be listed as necessary
+    # test go here...
+  end
+
+  # test/post_test.rb
+  class PostTest < ActiveSupport::TestCase
+    preload_factory_data :posts # dependencies are taken into account, so users will automatically be preloaded as well.
+    # test go here...
   end
 
 == Notes, etc.
