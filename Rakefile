@@ -9,6 +9,8 @@ begin
     gem.email = "myron.marston@gmail.com"
     gem.homepage = "http://github.com/myronmarston/factory_data_preloader"
     gem.authors = ["Myron Marston"]
+    gem.add_development_dependency 'Shoulda'
+    gem.add_development_dependency 'mocha'
 
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
