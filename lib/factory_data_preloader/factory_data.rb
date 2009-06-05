@@ -5,10 +5,15 @@ module FactoryDataPreloader
   class PreloadedRecordNotFound < StandardError; end
   class DefinedPreloaderNotRunError < StandardError; end
 
+  module Methods
+  end
+
   class FactoryData
     @@preloaded_cache = nil
     @@preloaded_data_deleted = nil
     @@single_test_cache = {}
+
+    extend Methods
 
     class << self
       # An Array of strings specifying locations that should be searched for
@@ -24,9 +29,9 @@ module FactoryDataPreloader
         depends_on = [options[:depends_on]].compact.flatten
         FactoryDataPreloader::Preloader.new(model_type, model_class, proc, depends_on)
 
-        class << self; self; end.class_eval do
+        Methods.class_eval do
           define_method model_type do |key|
-            get_record(model_type, model_class, key)
+            FactoryData.send(:get_record, model_type, model_class, key)
           end
         end
       end
