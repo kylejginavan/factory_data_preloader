@@ -1,3 +1,5 @@
+require 'active_support/deprecation'
+
 module FactoryDataPreloader
   class PreloaderNotDefinedError < StandardError; end
 
@@ -26,20 +28,22 @@ module FactoryDataPreloader
 
   class Preloader
     attr_accessor :model_type, :model_class, :proc, :depends_on
+    attr_reader   :data
 
     def initialize(model_type, model_class, proc, depends_on)
       @model_type, @model_class, @proc, @depends_on = model_type, model_class, proc, depends_on || []
       AllPreloaders.instance << self
     end
 
-    def data
-      @data ||= begin
-        data = PreloaderDataHash.new
-        print "Preloading #{model_type}:"
-        benchmark_measurement = Benchmark.measure { self.proc.try(:call, data) }
-        print "(#{format('%.3f', benchmark_measurement.real)} secs)\n"
-        data
-      end
+    def preload!
+      @data = PreloadedDataHash.new(self)
+      print "Preloading #{model_type}:"
+      benchmark_measurement = Benchmark.measure { self.proc.try(:call, @data) }
+      print "(#{format('%.3f', benchmark_measurement.real)} secs)\n"
+    end
+
+    def preloaded?
+      !@data.nil?
     end
 
     def dependencies
@@ -49,12 +53,21 @@ module FactoryDataPreloader
     def all_dependencies
       @all_dependencies ||= (self.dependencies + (self.dependencies.collect { |d| d.all_dependencies }).flatten).uniq
     end
-  end
 
-  class PreloaderDataHash < Hash
-    def []=(key, value)
-      print "."
-      super
+    def get_record(key)
+      unless self.preloaded?
+        raise DefinedPreloaderNotRunError.new, "The :#{self.model_type} preloader has never been run.  Did you forget to add the 'preload_factory_data :#{self.model_type}' declaration to your test case?  You'll need this at the top of your test case class if you want to use the factory data defined by this preloader."
+      end
+
+      unless record_id_or_error = self.data[key]
+        raise PreloadedRecordNotFound.new, "Could not find a preloaded record #{self.model_type} recore for :#{key}.  Did you mispell :#{key}?"
+      end
+
+      if record_id_or_error.is_a?(Exception)
+        raise ErrorWhilePreloadingRecord.new, "An error occurred while preloading #{self.model_type}(:#{key}): #{record_id_or_error.class.to_s}: #{record_id_or_error.message}\n\nBacktrace:\n\n#{record_id_or_error.backtrace}"
+      end
+
+      self.model_class.find_by_id(record_id_or_error)
     end
   end
 

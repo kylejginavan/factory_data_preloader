@@ -8,7 +8,7 @@ class FactoryDataTest < Test::Unit::TestCase
   context 'Calling FactoryData.preload(:users)' do
     setup do
       FactoryData.preload(:users) do |data|
-        data[:thom] = User.create(:first_name => 'Thom', :last_name => 'York')
+        data.add(:thom) { User.create(:first_name => 'Thom', :last_name => 'York') }
       end
     end
 
@@ -27,20 +27,15 @@ class FactoryDataTest < Test::Unit::TestCase
       context 'and calling FactoryData.delete_preload_data!' do
         setup { FactoryData.delete_preload_data! }
         should_change 'User.count', :to => 0
-
-        context 'and there is another record in the database' do
-          setup { User.create(:first_name => 'George', :last_name => 'Bush') }
-
-          context 'and FactoryData.delete_preload_data! is called again' do
-            setup { FactoryData.delete_preload_data! }
-            should_not_change 'User.count'
-          end
-        end
       end
     end
 
     context 'and later calling FactoryData.preload_data!' do
-      setup { FactoryData.preload_data! }
+      setup do
+        @out, @err = OutputCapturer.capture do
+          FactoryData.preload_data!
+        end
+      end
 
       should_change 'User.count', :by => 1
 
@@ -77,47 +72,14 @@ class FactoryDataTest < Test::Unit::TestCase
     end
   end
 
-  context 'Preloading a record that has not been saved' do
-    setup do
-      @unsaved_user = User.new(:first_name => 'George', :last_name => 'Washington')
-      assert @unsaved_user.new_record?
-
-      FactoryData.preload(:users) do |data|
-        data[:george] = @unsaved_user
-      end
-    end
-
-    should 'save the record wen preload_data! is called' do
-      FactoryData.preload_data!
-      assert !@unsaved_user.new_record?
-    end
-  end
-
-  context 'Preloading a record that cannot be saved to the database' do
-    setup do
-      @invalid_user = User.new(:first_name => 'Bob')
-      assert !@invalid_user.valid?
-
-      FactoryData.preload(:users) do |data|
-        data[:bob] = @invalid_user
-      end
-    end
-
-    should 'print an appropriate error message when preload_data! is called' do
-      out, err = OutputCapturer.capture do
-        FactoryData.preload_data!
-      end
-
-      assert_match /Error preloading factory data\.\s+User :bob could not be saved\.\s+Errors:\s+last_name can't be blank/im, out
-    end
-  end
-
   context 'Preloading with an explicit :model_class option' do
     setup do
       FactoryData.preload(:posts, :model_class => User) do |data|
-        data[:george] = User.create(:first_name => 'George', :last_name => 'Washington')
+        data.add(:george) { User.create(:first_name => 'George', :last_name => 'Washington') }
       end
-      FactoryData.preload_data!
+      @out, @err = OutputCapturer.capture do
+        FactoryData.preload_data!
+      end
     end
 
     should 'use the passed model_class rather than inferring the class from the symbol' do
@@ -128,23 +90,26 @@ class FactoryDataTest < Test::Unit::TestCase
   context 'Preloading multiple record types, with dependencies' do
     setup do
       FactoryData.preload(:comments, :depends_on => [:users, :posts]) do |data|
-        data[:woohoo] = FactoryData.users(:john).comments.create(:post => FactoryData.posts(:tour), :comment => "I can't wait!")
+        data.add(:woohoo) { FactoryData.users(:john).comments.create(:post => FactoryData.posts(:tour), :comment => "I can't wait!") }
       end
 
       FactoryData.preload(:posts, :depends_on => :users) do |data|
-        data[:tour] = FactoryData.users(:thom).posts.create(:title => 'Tour!', :body => 'Radiohead will tour soon.')
+        data.add(:tour) { FactoryData.users(:thom).posts.create(:title => 'Tour!', :body => 'Radiohead will tour soon.') }
       end
 
       FactoryData.preload(:users) do |data|
-        data[:thom] = User.create(:first_name => 'Thom', :last_name => 'York')
-        data[:john] = User.create(:first_name => 'John', :last_name => 'Doe')
+        data.add(:thom) { User.create(:first_name => 'Thom', :last_name => 'York') }
+        data.add(:john) { User.create(:first_name => 'John', :last_name => 'Doe') }
       end
     end
 
     should "raise the appropriate error when a developer tries to access a record that wasn't preloaded" do
       FactoryDataPreloader.preload_all = false
       FactoryDataPreloader.preload_types << :users
-      FactoryData.preload_data!
+
+      @out, @err = OutputCapturer.capture do
+        FactoryData.preload_data!
+      end
 
       assert FactoryData.users(:thom)
       assert_raise FactoryDataPreloader::DefinedPreloaderNotRunError do
@@ -153,7 +118,10 @@ class FactoryDataTest < Test::Unit::TestCase
     end
 
     should 'preload them in the proper order, allowing you to use the dependencies' do
-      FactoryData.preload_data!
+      @out, @err = OutputCapturer.capture do
+        FactoryData.preload_data!
+      end
+
       assert_equal 'Thom', FactoryData.users(:thom).first_name
       assert_equal 'John', FactoryData.users(:john).first_name
 

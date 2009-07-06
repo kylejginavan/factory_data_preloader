@@ -54,13 +54,12 @@ module FactoryDataPreloader
           remove_method(preloader.model_type) if method_defined?(preloader.model_type)
         end
 
-        unless @@preloaded_cache.nil?
-          preloader.model_class.delete_all(:id => (@@preloaded_cache[preloader.model_type] || {}).values)
+        if preloader.data
+          preloader.model_class.delete_all(:id => preloader.data.record_ids)
+          preloader.instance_variable_set('@data', nil)
         end
       end
 
-      @@preloaded_cache = nil
-      @@preloaded_data_deleted = nil
       @@single_test_cache = {}
       FactoryDataPreloader::AllPreloaders.instance.clear
     end

@@ -8,20 +8,55 @@ class PreloaderTest < Test::Unit::TestCase
   context 'A new preloader' do
     setup do
       proc = lambda { |data|
-        data[:thom] = User.create(:first_name => 'Thom', :last_name => 'York')
-        data[:john] = User.create(:first_name => 'John', :last_name => 'Doe')
+        data.add(:thom) { User.create(:first_name => 'Thom', :last_name => 'York') }
+        data.add(:john) { User.create(:first_name => 'John', :last_name => 'Doe') }
       }
       @preloader = FactoryDataPreloader::Preloader.new(:users, User, proc, [])
     end
 
-    should 'return the preloaded data for #data' do
-      data = @preloader.data
-      assert_equal 'York', data[:thom].last_name
-      assert_equal 'Doe',  data[:john].last_name
-    end
-
     should 'be automatically added to the PreloaderCollection' do
       assert_equal [@preloader], FactoryDataPreloader::AllPreloaders.instance
+    end
+
+    context 'when preloaded' do
+      setup do
+        @out, @err = OutputCapturer.capture do
+          @preloader.preload!
+        end
+      end
+
+      should 'return the preloaded data when #get_record is called' do
+        assert_equal 'York', @preloader.get_record(:thom).last_name
+        assert_equal 'Doe',  @preloader.get_record(:john).last_name
+      end
+
+      should 'print out a preloader message, a dot for each record and a benchmark' do
+        assert_equal '', @err
+        assert_match /Preloading users:\.\.\([\d\.]+ secs\)/, @out
+      end
+    end
+  end
+
+  context 'A preloader with errors' do
+    setup do
+      proc = lambda { |data|
+        data.add(:thom) { raise StandardError('Error for thom') }
+        data.add(:john) { @john = User.create(:first_name => 'John', :last_name => 'Doe') }
+      }
+      @preloader = FactoryDataPreloader::Preloader.new(:users, User, proc, [])
+      @out, @err = OutputCapturer.capture do
+        @preloader.preload!
+      end
+    end
+
+    should 'raise an exception when the record with the error is accessed' do
+      assert_raise FactoryDataPreloader::ErrorWhilePreloadingRecord do
+        @preloader.get_record(:thom)
+      end
+    end
+
+    should 'allow the error-free records to be accessed, even when they were created after the error record' do
+      assert_equal @john, @preloader.get_record(:john)
     end
   end
 
