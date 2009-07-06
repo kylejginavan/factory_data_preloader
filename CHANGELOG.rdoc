@@ -1,0 +1,36 @@
+== 0.4.3 / 2009-06-05
+
+* Added shoulda and mocha development dependencies.
+
+== 0.4.2 / 2009-06-02
+
+* Raise an appropriate error when the developer tries to get a record for a preloader that was never run.
+
+== 0.4.1 / 2009-06-01
+
+* Updated documentation (Forgot to for the 0.4.0 release).
+
+== 0.4.0 / 2009-06-01
+
+* Added ability to only preload some of the types.
+* During preloading, print to the console to indicate the records being preloaded and a benchmark.
+
+== 0.3.2 / 2009-04-07
+
+* Fixed a bug with the ordering of the dependent preloaders.
+
+== 0.3.1 / 2009-03-30
+
+* Updated documentation. (Forgot to for 0.3.0 release)
+
+== 0.3.0 / 2009-03-30
+
+* Added logic to auto load the factory_data files.
+
+== 0.2.0 / 2009-03-30
+
+* Added :depends_on option to the preloader, to force the preloaders to load in the correct order based on your foreign keys and table dependencies.
+
+== 0.1.0 / 2009-03-30
+
+* Initial release
