@@ -31,7 +31,9 @@ module FactoryDataPreloader
     attr_reader   :data
 
     def initialize(model_type, model_class, proc, depends_on)
-      @model_type, @model_class, @proc, @depends_on = model_type, model_class, proc, depends_on || []
+      model_class ||= model_type.to_s.pluralize.classify.constantize
+
+      @model_type, @model_class, @proc, @depends_on = model_type, model_class, proc, [depends_on].compact.flatten
       AllPreloaders.instance << self
     end
 

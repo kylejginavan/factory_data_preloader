@@ -24,10 +24,7 @@ module FactoryDataPreloader
       def preload(model_type, options = {}, &proc)
         raise PreloaderAlreadyDefinedError.new, "You have already defined the preloader for #{model_type.to_s}" if AllPreloaders.instance.map(&:model_type).include?(model_type)
 
-        # TODO: fix this...
-        model_class = options[:model_class] || model_type.to_s.singularize.classify.constantize
-        depends_on = [options[:depends_on]].compact.flatten
-        FactoryDataPreloader::Preloader.new(model_type, model_class, proc, depends_on)
+        FactoryDataPreloader::Preloader.new(model_type, options[:model_class], proc, options[:depends_on])
 
         Methods.class_eval do
           define_method model_type do |key|

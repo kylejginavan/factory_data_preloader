@@ -37,6 +37,16 @@ class PreloaderTest < Test::Unit::TestCase
     end
   end
 
+  context 'A new preloader for email_addresses' do
+    setup do
+      @preloader = FactoryDataPreloader::Preloader.new(:email_addresses, nil, lambda { }, [])
+    end
+
+    should 'infer the model class' do
+      assert_equal EmailAddress, @preloader.model_class
+    end
+  end
+
   context 'A preloader with errors' do
     setup do
       proc = lambda { |data|

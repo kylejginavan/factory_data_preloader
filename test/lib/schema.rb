@@ -1,5 +1,11 @@
 OutputCapturer.capture do
   ActiveRecord::Schema.define do
+    create_table :email_addresses, :force => true do |t|
+      t.string   :address
+    end
+  end
+
+  ActiveRecord::Schema.define do
     create_table :users, :force => true do |t|
       t.string   :first_name
       t.string   :last_name
