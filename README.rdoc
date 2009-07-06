@@ -34,23 +34,23 @@ Define your preloaded data.  FactoryData will automatically require test/factory
 Define your data in these files like this:
 
   FactoryData.preload(:users) do |data|
-    data[:thom] = User.create(:first_name => 'Thom', :last_name => 'York')
-    data[:john] = User.create(:first_name => 'John', :last_name => 'Doe')
+    data.add(:thom) { User.create(:first_name => 'Thom', :last_name => 'York') }
+    data.add(:john) { User.create(:first_name => 'John', :last_name => 'Doe') }
   end
 
   FactoryData.preload(:posts, :depends_on => :users) do |data|
     # note the use of the :depends_on option to force the users to be loaded first.
-    data[:tour] = FactoryData.users(:thom).posts.create(:title => 'Tour!', :body => 'Radiohead will tour soon.')
+    data.add(:tour) { FactoryData.users(:thom).posts.create(:title => 'Tour!', :body => 'Radiohead will tour soon.') }
   end
   
   FactoryData.preload(:some_other_posts, :model_class => Post, :depends_on => :users) do |data|
     # note the use of the :model_class option when the model class cannot be inferred from the symbol.
-    data[:another_post] = Post.create(:user => FactoryData.users(:john), :title => 'Life is good')
+    data.add(:another_post) { Post.create(:user => FactoryData.users(:john), :title => 'Life is good') }
   end
 
   FactoryData.preload(:comments, :depends_on => [:users, :posts]) do |data|
     # :depends_on lets you pass an array
-    data[:woohoo] = FactoryData.users(:john).comments.create(:post => FactoryData.posts(:tour), :comment => "I can't wait!")
+    data.add(:woohoo) { FactoryData.users(:john).comments.create(:post => FactoryData.posts(:tour), :comment => "I can't wait!") }
   end
 
 Finally, use this preloaded data in your tests:
@@ -80,19 +80,19 @@ at the start of each test run.  If you want finer grain control over which prelo
   # test/user_test.rb
   class UserTest < ActiveSupport::TestCase
     preload_factory_data :users # multiple types can be listed as necessary
-    # test go here...
+    # tests go here...
   end
 
   # test/post_test.rb
   class PostTest < ActiveSupport::TestCase
     preload_factory_data :posts # dependencies are taken into account, so users will automatically be preloaded as well.
-    # test go here...
+    # tests go here...
   end
 
 == Notes, etc.
 
 * This gem has been tested with Rails 2.2.2 and Rails 2.3.2.
-* You can create the data using any gem or plugin you want.  In this contrived example, I just used ActiveRecord's
+* You can create the data using any fixture replacement you want.  In this contrived example, I just used ActiveRecord's
   built in methods for simplicity's sake.
 * FactoryData#preload does not actually preload the data.  It simply defines the data that will be automatically preloaded
   at the appropriate time (namely, at the same time when rails loads the fixtures).
@@ -106,6 +106,22 @@ at the start of each test run.  If you want finer grain control over which prelo
 * The preloader will also delete all records from the database, before any preloading begins.  This is done at the same
   time that rails deletes records for test fixtures.  The tables are cleared using the reverse of the order defined by 
   your :depends_on options, so be sure to use :depends_on if you have foreign key constraints.
+* Errors that occur during preloading are handled smartly: a warning is printed when one occurs, and an exception is raised
+  when the record that had the error is accessed.  This should allow the rest of the data to be preloaded, and cause only
+  the tests that access the records with errors to fail.
+* The syntax used before the 0.5.0 release is still allowed but has been deprecated.  Instead of this:
+
+  FactoryData.preload(:users) do |data|
+    data[:thom] = User.create(:first_name => 'Thom', :last_name => 'York')
+    data[:john] = User.create(:first_name => 'John', :last_name => 'Doe') }
+  end
+
+  Use this:
+
+  FactoryData.preload(:users) do |data|
+    data.add(:thom) { User.create(:first_name => 'Thom', :last_name => 'York') }
+    data.add(:john) { User.create(:first_name => 'John', :last_name => 'Doe') }
+  end
 
 == Copyright
 
