@@ -22,7 +22,9 @@ module FactoryDataPreloader
       attr_accessor :definition_file_paths
 
       def preload(model_type, options = {}, &proc)
-        raise PreloaderAlreadyDefinedError.new, "You have already defined the preloader for #{model_type.to_s}" if AllPreloaders.instance.map(&:model_type).include?(model_type)
+        if existing_preloader = AllPreloaders.instance.from_symbol(model_type, false)
+          existing_preloader.remove!
+        end
 
         FactoryDataPreloader::Preloader.new(model_type, options[:model_class], proc, options[:depends_on])
 

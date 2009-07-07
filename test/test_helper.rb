@@ -42,27 +42,13 @@ module FactoryDataPreloader
   def self.reset!
     self.preload_all = true
     self.preload_types = []
-    @requested_preloaders = nil
-    FactoryData.reset!
-  end
 
-  class FactoryData
-    # helper method to reset the factory data between test runs.
-    def self.reset!
-      FactoryDataPreloader::AllPreloaders.instance.each do |preloader|
-        DataMethods.class_eval do
-          remove_method(preloader.model_type) if method_defined?(preloader.model_type)
-        end
-
-        if preloader.data
-          preloader.model_class.delete_all(:id => preloader.data.record_ids)
-          preloader.instance_variable_set('@data', nil)
-        end
-      end
-
-      @@single_test_cache = {}
-      FactoryDataPreloader::AllPreloaders.instance.clear
+    preloaders = Array.new(FactoryDataPreloader::AllPreloaders.instance)
+    preloaders.each do |preloader|
+      preloader.remove!
     end
+
+    FactoryData.reset_cache!
   end
 end
 

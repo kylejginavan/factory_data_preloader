@@ -13,15 +13,13 @@ module FactoryDataPreloader
     alias :preload_all? :preload_all
 
     def requested_preloaders
-      @requested_preloaders ||= begin
-        if preload_all?
-          AllPreloaders.instance
-        else
-          preloaders = self.preload_types.collect { |type| AllPreloaders.instance.from_symbol(type) }
-          preloaders += (preloaders.collect { |p| p.all_dependencies }).flatten
-          preloaders.uniq!
-          PreloaderCollection.new(preloaders)
-        end
+      if preload_all?
+        AllPreloaders.instance
+      else
+        preloaders = self.preload_types.collect { |type| AllPreloaders.instance.from_symbol(type) }
+        preloaders += (preloaders.collect { |p| p.all_dependencies }).flatten
+        preloaders.uniq!
+        PreloaderCollection.new(preloaders)
       end
     end
   end
@@ -35,6 +33,12 @@ module FactoryDataPreloader
 
       @model_type, @model_class, @proc, @depends_on = model_type, model_class, proc, [depends_on].compact.flatten
       AllPreloaders.instance << self
+
+      DataMethods.class_eval do
+        define_method model_type do |key|
+          FactoryData.send(:get_record, model_type, key)
+        end
+      end
     end
 
     def preload!
@@ -49,11 +53,11 @@ module FactoryDataPreloader
     end
 
     def dependencies
-      @dependencies ||= self.depends_on.collect { |dependency| AllPreloaders.instance.from_symbol(dependency) }
+      self.depends_on.collect { |dependency| AllPreloaders.instance.from_symbol(dependency) }
     end
 
     def all_dependencies
-      @all_dependencies ||= (self.dependencies + (self.dependencies.collect { |d| d.all_dependencies }).flatten).uniq
+      (self.dependencies + (self.dependencies.collect { |d| d.all_dependencies }).flatten).uniq
     end
 
     def get_record(key)
@@ -70,6 +74,20 @@ module FactoryDataPreloader
       end
 
       self.model_class.find_by_id(record_id_or_error)
+    end
+
+    def remove!
+      preloader = self
+      DataMethods.class_eval do
+        remove_method(preloader.model_type) if method_defined?(preloader.model_type)
+      end
+
+      if @data
+        self.model_class.delete_all(:id => @data.record_ids)
+        @data = nil
+      end
+
+      AllPreloaders.instance.delete(self)
     end
   end
 

@@ -15,9 +15,9 @@ module FactoryDataPreloader
       ordered_preloaders
     end
 
-    def from_symbol(symbol)
+    def from_symbol(symbol, raise_error = true)
       unless preloader = self.detect { |p| p.model_type == symbol }
-        raise PreloaderNotDefinedError, "The preloader for :#{symbol} has not been defined."
+        raise PreloaderNotDefinedError, "The preloader for :#{symbol} has not been defined." if raise_error
       end
       preloader
     end

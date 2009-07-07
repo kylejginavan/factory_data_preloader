@@ -15,12 +15,6 @@ class FactoryDataTest < Test::Unit::TestCase
     should_not_change 'User.count'
     should_change "FactoryData.methods.include?('users')", :from => false, :to => true
 
-    should 'not allow it to be called again' do
-      assert_raise FactoryDataPreloader::PreloaderAlreadyDefinedError do
-        FactoryData.preload(:users)
-      end
-    end
-
     context 'when there was a previous user record in the database' do
       setup { User.create(:first_name => 'Barack', :last_name => 'Obama') }
 
@@ -38,6 +32,27 @@ class FactoryDataTest < Test::Unit::TestCase
       end
 
       should_change 'User.count', :by => 1
+
+      context 'and later re-defining the preloaders' do
+        setup do
+          FactoryData.preload(:users) do |data|
+            data.add(:thom) { User.create(:first_name => 'Thom', :last_name => 'York') }
+            data.add(:john) { User.create(:first_name => 'John', :last_name => 'Doe') }
+          end
+        end
+
+        should_change 'User.count', :by => -1
+
+        context 'and preloading the re-defined preloader' do
+          setup do
+            @out, @err = OutputCapturer.capture do
+              FactoryData.preload_data!
+            end
+          end
+
+          should_change 'User.count', :by => 2
+        end
+      end
 
       context 'and later calling FactoryData.users(key)' do
         setup { @user = FactoryData.users(:thom) }
