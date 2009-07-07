@@ -51,6 +51,22 @@ class PreloaderTest < Test::Unit::TestCase
 
         should_not_change 'User.count'
       end
+
+      should 'issue a delete statement if #delete_table_data! is called' do
+        User.expects(:delete_all).once
+        @preloader.delete_table_data!
+      end
+
+      context 'when #delete_table_data! is called' do
+        setup do
+          @preloader.delete_table_data!
+        end
+
+        should 'not issue another delete statement if #delete_table_data! is later called on the same preloader' do
+          User.expects(:delete_all).never
+          @preloader.delete_table_data!
+        end
+      end
     end
   end
 

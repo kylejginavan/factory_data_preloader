@@ -38,7 +38,7 @@ module FactoryDataPreloader
       def delete_preload_data!
         # Delete them in the reverse order of the dependencies, to handle foreign keys
         FactoryDataPreloader.requested_preloaders.dependency_order.reverse.each do |preloader|
-          preloader.model_class.delete_all
+          preloader.delete_table_data!
         end
       end
 

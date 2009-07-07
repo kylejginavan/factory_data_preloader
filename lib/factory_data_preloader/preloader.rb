@@ -53,6 +53,13 @@ module FactoryDataPreloader
       !@data.nil?
     end
 
+    def delete_table_data!
+      unless @table_data_deleted
+        self.model_class.delete_all
+        @table_data_deleted = true
+      end
+    end
+
     def dependencies
       self.depends_on.collect { |dependency| AllPreloaders.instance.from_symbol(dependency) }
     end
