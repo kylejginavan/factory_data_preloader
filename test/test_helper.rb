@@ -50,7 +50,7 @@ module FactoryDataPreloader
     # helper method to reset the factory data between test runs.
     def self.reset!
       FactoryDataPreloader::AllPreloaders.instance.each do |preloader|
-        Methods.class_eval do
+        DataMethods.class_eval do
           remove_method(preloader.model_type) if method_defined?(preloader.model_type)
         end
 

@@ -6,13 +6,13 @@ module FactoryDataPreloader
   class DefinedPreloaderNotRunError < StandardError; end
   class ErrorWhilePreloadingRecord < StandardError; end
 
-  module Methods
+  module DataMethods
   end
 
   class FactoryData
     @@single_test_cache = {}
 
-    extend Methods
+    extend DataMethods
 
     class << self
       # An Array of strings specifying locations that should be searched for
@@ -26,7 +26,7 @@ module FactoryDataPreloader
 
         FactoryDataPreloader::Preloader.new(model_type, options[:model_class], proc, options[:depends_on])
 
-        Methods.class_eval do
+        DataMethods.class_eval do
           define_method model_type do |key|
             FactoryData.send(:get_record, model_type, key)
           end
