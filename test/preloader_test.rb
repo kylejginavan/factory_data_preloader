@@ -25,6 +25,8 @@ class PreloaderTest < Test::Unit::TestCase
         end
       end
 
+      should_change 'User.count', :by => 2
+
       should 'return the preloaded data when #get_record is called' do
         assert_equal 'York', @preloader.get_record(:thom).last_name
         assert_equal 'Doe',  @preloader.get_record(:john).last_name
@@ -33,6 +35,21 @@ class PreloaderTest < Test::Unit::TestCase
       should 'print out a preloader message, a dot for each record and a benchmark' do
         assert_equal '', @err
         assert_match /Preloading users:\.\.\([\d\.]+ secs\)/, @out
+      end
+
+      context 'when preloaded again' do
+        setup do
+          @out, @err = OutputCapturer.capture do
+            @preloader.preload!
+          end
+        end
+
+        should 'print nothing' do
+          assert_equal '', @err
+          assert_equal '', @out
+        end
+
+        should_not_change 'User.count'
       end
     end
   end

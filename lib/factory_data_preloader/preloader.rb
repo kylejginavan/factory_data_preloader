@@ -42,6 +42,7 @@ module FactoryDataPreloader
     end
 
     def preload!
+      return if preloaded?
       @data = PreloadedDataHash.new(self)
       print "Preloading #{model_type}:"
       benchmark_measurement = Benchmark.measure { self.proc.try(:call, @data) }
