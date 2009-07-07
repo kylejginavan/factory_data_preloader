@@ -23,7 +23,7 @@ class PreloadedDataHash
     begin
       add_to_backing_hash(key, yield)
     rescue => e
-      puts "WARNING: an error occurred while preloading the #{preloader.model_type.to_s}(:#{key}) record: #{e.class.to_s}: #{e.message}\n\nBacktrace: \n#{e.backtrace}\n\n"
+      puts "WARNING: an error occurred while preloading the #{preloader.model_type.to_s}(:#{key}) record: #{e.class.to_s}: #{e.message}"
       add_to_backing_hash(key, nil, e)
     end
   end
