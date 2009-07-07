@@ -123,6 +123,10 @@ at the start of each test run.  If you want finer grain control over which prelo
     data.add(:john) { User.create(:first_name => 'John', :last_name => 'Doe') }
   end
 
+== Known Issues
+
+* This gem doesn't play nice with autotest.
+
 == Copyright
 
 Copyright (c) 2009 Myron Marston, Kashless.org. See LICENSE for details.
