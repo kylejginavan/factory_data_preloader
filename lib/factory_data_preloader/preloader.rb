@@ -78,7 +78,7 @@ module FactoryDataPreloader
       end
 
       if record_id_or_error.is_a?(Exception)
-        raise ErrorWhilePreloadingRecord.new, "An error occurred while preloading #{self.model_type}(:#{key}): #{record_id_or_error.class.to_s}: #{record_id_or_error.message}\n\nBacktrace:\n\n#{record_id_or_error.backtrace}"
+        raise ErrorWhilePreloadingRecord.new, "An error occurred while preloading #{self.model_type}(:#{key}): #{record_id_or_error.class.to_s}: #{record_id_or_error.message}\n\nBacktrace:\n\n    #{record_id_or_error.backtrace.join("\n    ")}\n"
       end
 
       self.model_class.find_by_id(record_id_or_error)
