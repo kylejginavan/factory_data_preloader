@@ -113,7 +113,7 @@ at the start of each test run.  If you want finer grain control over which prelo
 
     FactoryData.preload(:users) do |data|
       data[:thom] = User.create(:first_name => 'Thom', :last_name => 'York')
-      data[:john] = User.create(:first_name => 'John', :last_name => 'Doe') }
+      data[:john] = User.create(:first_name => 'John', :last_name => 'Doe')
     end
 
 Use this:
