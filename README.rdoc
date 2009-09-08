@@ -111,17 +111,17 @@ at the start of each test run.  If you want finer grain control over which prelo
   the tests that access the records with errors to fail.
 * The syntax used before the 0.5.0 release is still allowed but has been deprecated.  Instead of this:
 
-  FactoryData.preload(:users) do |data|
-    data[:thom] = User.create(:first_name => 'Thom', :last_name => 'York')
-    data[:john] = User.create(:first_name => 'John', :last_name => 'Doe') }
-  end
+    FactoryData.preload(:users) do |data|
+      data[:thom] = User.create(:first_name => 'Thom', :last_name => 'York')
+      data[:john] = User.create(:first_name => 'John', :last_name => 'Doe') }
+    end
 
-  Use this:
+Use this:
 
-  FactoryData.preload(:users) do |data|
-    data.add(:thom) { User.create(:first_name => 'Thom', :last_name => 'York') }
-    data.add(:john) { User.create(:first_name => 'John', :last_name => 'Doe') }
-  end
+    FactoryData.preload(:users) do |data|
+      data.add(:thom) { User.create(:first_name => 'Thom', :last_name => 'York') }
+      data.add(:john) { User.create(:first_name => 'John', :last_name => 'Doe') }
+    end
 
 == Known Issues
 
