@@ -74,7 +74,7 @@ module FactoryDataPreloader
       end
 
       unless record_id_or_error = self.data[key]
-        raise PreloadedRecordNotFound.new, "Could not find a preloaded record #{self.model_type} recore for :#{key}.  Did you mispell :#{key}?"
+        raise PreloadedRecordNotFound.new, "Could not find a preloaded record #{self.model_type} record for :#{key}.  Did you mispell :#{key}?"
       end
 
       if record_id_or_error.is_a?(Exception)
