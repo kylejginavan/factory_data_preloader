@@ -18,17 +18,15 @@ and re-use it in each test when rails rolls back the transaction.
 
 == Download
 
-Github: http://github.com/myronmarston/factory_data_preloader/tree/master
+Github: http://github.com/myronmarston/factory_data_preloader
 
 Gem:
-  gem install myronmarston-factory_data_preloader --source http://gems.github.com
+  gem install factory_data_preloader --source http://gemcutter.org
   
 == Usage
 
 Load the gem using Rails' 2.1+ gem support, in either config/environment.rb, or config/environments/test.rb:
-  config.gem 'myronmarston-factory_data_preloader', 
-    :lib => 'factory_data_preloader', 
-    :source => 'http://gems.github.com'
+  config.gem 'factory_data_preloader', :source => 'http://gemcutter.org'
 
 Define your preloaded data.  FactoryData will automatically require test/factory_data.rb or test/factory_data/*.rb.
 Define your data in these files like this:
@@ -91,7 +89,7 @@ at the start of each test run.  If you want finer grain control over which prelo
 
 == Notes, etc.
 
-* This gem has been tested with Rails 2.2.2 and Rails 2.3.2.
+* This gem has been tested with Rails 2.2.2, 2.3.2, 2.3.3 and 2.3.4.
 * You can create the data using any fixture replacement you want.  In this contrived example, I just used ActiveRecord's
   built in methods for simplicity's sake.
 * FactoryData#preload does not actually preload the data.  It simply defines the data that will be automatically preloaded
