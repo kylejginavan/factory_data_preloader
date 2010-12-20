@@ -9,7 +9,26 @@ Gem::Specification.new do |s|
   s.date = %q{2009-07-09}
   s.email = %q{myron.marston@gmail.com}
   s.extra_rdoc_files = ["README.rdoc", "LICENSE"]
-  s.files = ["CHANGELOG.rdoc", "README.rdoc", "VERSION.yml", "lib/factory_data_preloader", "lib/factory_data_preloader/core_ext.rb", "lib/factory_data_preloader/factory_data.rb", "lib/factory_data_preloader/preloaded_data_hash.rb", "lib/factory_data_preloader/preloader.rb", "lib/factory_data_preloader/preloader_collection.rb", "lib/factory_data_preloader/rails_core_ext.rb", "lib/factory_data_preloader.rb", "test/factory_data_test.rb", "test/lib", "test/lib/models.rb", "test/lib/schema.rb", "test/preloaded_data_hash_test.rb", "test/preloader_test.rb", "test/test_helper.rb", "LICENSE"]
+  s.files = ["CHANGELOG.rdoc",
+             "README.rdoc",
+             "VERSION.yml",
+             "lib/factory_data_preloader",
+             "lib/factory_data_preloader/core_ext.rb",
+             "lib/factory_data_preloader/factory_data.rb",
+             "lib/factory_data_preloader/preloaded_data_hash.rb",
+             "lib/factory_data_preloader/preloader.rb",
+             "lib/factory_data_preloader/preloader_collection.rb",
+             "lib/factory_data_preloader/rails_core_ext.rb",
+             "lib/factory_data_preloader/railtie.rb",
+             "lib/factory_data_preloader.rb",
+             "test/factory_data_test.rb",
+             "test/lib",
+             "test/lib/models.rb",
+             "test/lib/schema.rb",
+             "test/preloaded_data_hash_test.rb",
+             "test/preloader_test.rb",
+             "test/test_helper.rb",
+             "LICENSE"]
   s.has_rdoc = true
   s.homepage = %q{http://github.com/myronmarston/factory_data_preloader}
   s.rdoc_options = ["--inline-source", "--charset=UTF-8"]
