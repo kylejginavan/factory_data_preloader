@@ -42,11 +42,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activerecord
-  activesupport
+  activerecord (>= 2.3.0)
+  activesupport (>= 2.3.0)
   factory_data_preloader!
   jeweler
-  mocha
+  mocha (>= 0.9.10, < 0.10.0)
   ruby-debug (>= 0.10.3)
-  shoulda
-  sqlite3-ruby
+  shoulda (>= 2.11.3, < 2.12.0)
+  sqlite3-ruby (>= 1.3.2, < 1.4.0)

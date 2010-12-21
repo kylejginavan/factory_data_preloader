@@ -36,10 +36,10 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.1}
   s.summary = %q{A library for preloading test data in rails applications.}
 
-  s.add_development_dependency("shoulda", [">= 0"])
-  s.add_development_dependency("mocha", [">= 0"])
-  s.add_development_dependency("activerecord", [">= 0"])
-  s.add_development_dependency("activesupport", [">= 0"])
+  s.add_development_dependency("shoulda", [">= 2.11.3", "< 2.12.0"])
+  s.add_development_dependency("mocha", [">= 0.9.10", "< 0.10.0"])
+  s.add_development_dependency("activerecord", [">= 2.3.0"])
+  s.add_development_dependency("activesupport", [">= 2.3.0"])
   s.add_development_dependency("jeweler", [">= 0"])
-  s.add_development_dependency("sqlite3-ruby", [">= 0"])
+  s.add_development_dependency("sqlite3-ruby", [">= 1.3.2", "< 1.4.0"])
 end
