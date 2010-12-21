@@ -1,5 +1,6 @@
 require 'test/unit'
 require 'rubygems'
+require 'singleton'
 
 if ENV['RAILS_VERSION']
   puts "loading Rails version #{ENV['RAILS_VERSION']}"
