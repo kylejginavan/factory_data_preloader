@@ -1,4 +1,10 @@
-== 1.0.0 / 2010-12-20
+== 1.0.0.beta0 / 2010-12-21
+
+* Added Gemfile and updated gemspec to list all dependencies
+* Require all libraries needed (YAML and singleton)
+* Updated tests to work with latest shoulda
+
+== 1.0.0.beta0 / 2010-12-20
 
 * Updating to Rails 3 compat
 
