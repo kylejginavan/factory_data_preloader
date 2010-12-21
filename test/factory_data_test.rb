@@ -7,50 +7,68 @@ class FactoryDataTest < Test::Unit::TestCase
 
   context 'Calling FactoryData.preload(:users)' do
     setup do
+      @user_count = User.count
       FactoryData.preload(:users) do |data|
         data.add(:thom) { User.create(:first_name => 'Thom', :last_name => 'York') }
       end
     end
 
-    should_not_change 'User.count'
-    should_change "FactoryData.methods.include?('users')", :from => false, :to => true
+    should "not change User.count" do
+      assert_equal(@user_count, User.count)
+    end
+
+    should "change FactoryData.methods.include?('users') to true" do
+      assert_equal(true, FactoryData.methods.include?('users'))
+    end
 
     context 'when there was a previous user record in the database' do
       setup { User.create(:first_name => 'Barack', :last_name => 'Obama') }
 
       context 'and calling FactoryData.delete_preload_data!' do
         setup { FactoryData.delete_preload_data! }
-        should_change 'User.count', :to => 0
+
+        should "change User.count to 0" do
+          assert_equal(0, User.count)
+        end
       end
     end
 
     context 'and later calling FactoryData.preload_data!' do
       setup do
+        @user_count = User.count
         @out, @err = OutputCapturer.capture do
           FactoryData.preload_data!
         end
       end
 
-      should_change 'User.count', :by => 1
+      should "change User.count by 1" do
+        assert_equal(@user_count + 1, User.count)
+      end
 
       context 'and later re-defining the preloaders' do
         setup do
+          @user_count = User.count
           FactoryData.preload(:users) do |data|
             data.add(:thom) { User.create(:first_name => 'Thom', :last_name => 'York') }
             data.add(:john) { User.create(:first_name => 'John', :last_name => 'Doe') }
           end
         end
 
-        should_change 'User.count', :by => -1
+        should "change User.count by - 1" do
+          assert_equal(@user_count - 1, User.count)
+        end
 
         context 'and preloading the re-defined preloader' do
           setup do
+            @user_count = User.count
             @out, @err = OutputCapturer.capture do
               FactoryData.preload_data!
             end
           end
 
-          should_change 'User.count', :by => 2
+          should "create 2 users" do
+            assert_equal(@user_count + 2, User.count)
+          end
         end
       end
 
@@ -76,10 +94,12 @@ class FactoryDataTest < Test::Unit::TestCase
         end
 
         context 'and later calling FactoryData.reset_cache!' do
-          setup { FactoryData.reset_cache! }
+          setup do
+            FactoryData.reset_cache!
+          end
 
           should 'reload the record from the database the next time FactoryData.users(key) is called' do
-            User.expects(:find).once.returns(@user)
+            User.expects(:find_by_id).once.returns(@user)
             FactoryData.users(:thom)
           end
         end

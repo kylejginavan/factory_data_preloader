@@ -20,12 +20,15 @@ class PreloaderTest < Test::Unit::TestCase
 
     context 'when preloaded' do
       setup do
+        @user_count = User.count
         @out, @err = OutputCapturer.capture do
           @preloader.preload!
         end
       end
 
-      should_change 'User.count', :by => 2
+      should 'change User.count by 2' do
+        assert_equal(@user_count + 2, User.count)
+      end
 
       should 'return the preloaded data when #get_record is called' do
         assert_equal 'York', @preloader.get_record(:thom).last_name
@@ -39,6 +42,7 @@ class PreloaderTest < Test::Unit::TestCase
 
       context 'when preloaded again' do
         setup do
+          @user_count = User.count
           @out, @err = OutputCapturer.capture do
             @preloader.preload!
           end
@@ -49,7 +53,9 @@ class PreloaderTest < Test::Unit::TestCase
           assert_equal '', @out
         end
 
-        should_not_change 'User.count'
+        should 'not change User.count' do
+          assert_equal(@user_count, User.count)
+        end
       end
 
       should 'issue a delete statement if #delete_table_data! is called' do
