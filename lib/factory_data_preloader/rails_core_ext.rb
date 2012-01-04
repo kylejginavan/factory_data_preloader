@@ -23,13 +23,17 @@ patch_module.class_eval do
   alias_method_chain :teardown_fixtures, :preloaded_factory_data
 end
 
-class Fixtures
-  def delete_existing_fixtures_with_preloaded_factory_data
-    delete_existing_fixtures_without_preloaded_factory_data
-    FactoryData.delete_preload_data!
-  end
+# Fixtures#delete_existing_fixtures was removed in Rails 3.1
+# see: https://github.com/rails/rails/commit/f9ea47736e270152c264bb5f8fdbfaa1d04fe82f
+if ActiveRecord::Fixtures.instance_methods(false).include?(:delete_existing_fixtures)
+  class Fixtures
+    def delete_existing_fixtures_with_preloaded_factory_data
+      delete_existing_fixtures_without_preloaded_factory_data
+      FactoryData.delete_preload_data!
+    end
 
-  alias_method_chain :delete_existing_fixtures, :preloaded_factory_data
+    alias_method_chain :delete_existing_fixtures, :preloaded_factory_data
+  end
 end
 
 class ActiveSupport::TestCase
