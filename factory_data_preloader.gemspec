@@ -2,13 +2,13 @@
 
 Gem::Specification.new do |s|
   s.name = %q{factory_data_preloader}
-  s.version = "1.0.1"
+  s.version = "1.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kyle J. Ginavan"]
   s.date = %q{2009-07-09}
   s.email = %q{kylejginavan@gmail.com}
-  s.extra_rdoc_files = ["README.rdoc", "LICENSE"]
+  s.extra_rdoc_files = ["README.rdoc"]
  
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
@@ -26,6 +26,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency("mocha", [">= 0.9.10", "< 0.10.0"])
   s.add_development_dependency("activerecord", [">= 2.3.0"])
   s.add_development_dependency("activesupport", [">= 2.3.0"])
-  s.add_development_dependency("jeweler", [">= 0"])
   s.add_development_dependency("sqlite3-ruby", [">= 1.3.2", "< 1.4.0"])
 end
