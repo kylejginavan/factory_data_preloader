@@ -1,5 +1,4 @@
 require 'rubygems'
-require 'test/unit'
 require 'shoulda'
 require 'sqlite3'
 
@@ -10,7 +9,6 @@ begin
 rescue LoadError
   # ruby-debug wasn't available so neither can the debugging be
 end
-
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))

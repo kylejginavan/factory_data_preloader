@@ -8,8 +8,8 @@
 patch_module = defined?(ActiveRecord::TestFixtures) ? ActiveRecord::TestFixtures : Test::Unit::TestCase
 
 patch_module.class_eval do
-  def load_fixtures_with_preloaded_factory_data
-    val = load_fixtures_without_preloaded_factory_data
+  def setup_fixtures_with_preloaded_factory_data
+    val = setup_fixtures_without_preloaded_factory_data
     FactoryData.preload_data!
     val
   end
@@ -19,7 +19,7 @@ patch_module.class_eval do
     teardown_fixtures_without_preloaded_factory_data
   end
 
-  alias_method_chain :load_fixtures, :preloaded_factory_data
+  alias_method_chain :setup_fixtures, :preloaded_factory_data
   alias_method_chain :teardown_fixtures, :preloaded_factory_data
 end
 
